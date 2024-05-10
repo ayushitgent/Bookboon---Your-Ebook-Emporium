@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %} Index {% endblock %}
+{% block searchbox %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-8">
+            <form class="d-flex justify-content-end me-0 mb-4 mb-lg-0" action="{{ url_for('get_books') }}" method="GET">
+                <input type="hidden" name="section_id" value="{{ section.section_id }}">
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="query_section_books">
+                <select class="form-select me-2" name="category" aria-label="Search Category">
+                    <option value="title" selected>Title</option>
+                    <option value="author">Author</option>
+                </select>
+                <button class="btn btn-outline-success" type="submit">Search</button>
+            </form>
+        </div>
+        <div class="col-lg-4 text-end">
+            <a class="navbar-brand me-4" href='get_books?query_section_books={{ True }}'>Requests</a>
+            <a class="navbar-brand me-4" href="/sections">Sections</a>
+            <a class="navbar-brand me-4" href="#">Books</a>
+        </div>
+    </div>
+</div>
+{% endblock searchbox %}
+{% block content %}
+    <h4 style="margin-top: 40px; margin-bottom:20px; margin-left: 10px;"> &nbsp;&nbsp; Hello Admin {{ current_user.username }} !</h4>
+    <div class="row">
+        <div class="col-md-2">
+            <h5 style="margin-left: 20px;">Add Book :</h5>
+        </div>
+        <div class="col-md-4">
+            <h5 style="margin-left: 175px;">Edit Book from title :</h5>
+        </div>
+    </div>
+    <form method="POST" action="/add_books">
+        <div class="card">
+            <label for="name">Title:</label>
+            <input type="text" id="name" name="name" placeholder="Enter Name" required>
+            <label for="authors">Authors:</label>
+            <input type="text" id="authors" name="authors" placeholder="Enter Authors( Ex: ab, pq, yz)" required>
+            <label for="pages">No of Pages:</label>
+            <input type="text" id="pages" name="pages" placeholder="Enter no of pages." required>
+            <label for="price">Price:</label>
+            <input type="text" id="price" name="price" placeholder="Enter Price" required>
+            <label for="content">Content: </label>
+            <textarea id="content" name="content" rows="4" placeholder="Enter book Content" required></textarea>
+            <input type="hidden" name="section_id" value="{{ section.section_id }}">
+            <button style="margin-top: 10px;" class="add-btn">Add Book</button>
+        </div>
+    </form>
+    <form method="GET" action="/get_books">
+        <div class="card">
+          <input type="hidden" name="section_id" value="{{ section.section_id }}">
+          <label for="name">Title:</label>
+          <input type="text" id="name" name="name" placeholder="Enter Title" required>
+          <label for="authors">Authors:</label>
+          <input type="text" id="authors" name="authors" placeholder="Enter Authors( Ex - pq, ab)" required>
+          <button style="margin-top: 10px;" class="add-btn">Find Book</button>
+        </div>
+    </form>
+    {% if book %}
+    <form method="POST" action="/add_books">
+        <div class="card">
+            <input type="hidden" name="_method" value="PUT">
+            <input type="hidden" name="book_id" value="{{ book.book_id }}">
+            <input type="hidden" name="name" value="{{ book.name }}">
+            <input type="hidden" name="authors" value="{{ book.authors }}">
+            <input type="hidden" name="section_id" value="{{ book.section_id }}">
+            <h4> <label for="name">Title: {{ book.name }}</label> </h4> 
+            <h4> <label for="authors">Authors: {{ book.authors }}</label> </h4> 
+            <label for="pages">No of Pages:</label>
+            <input type="text" id="pages" name="pages" value="{{ book.no_of_pages }}">
+            <label for="price">Price:</label>
+            <input type="text" id="price" name="price" value="{{ book.price }}">
+            <label for="content">Content:</label>
+            <textarea id="content" name="content" rows="4">{{ book.content }}</textarea>
+            <button style="margin-top: 5px;" class="add-btn">Edit Book</button>
+        </div>
+    </form>
+    {% endif %}
+    {% if not books %}
+    <div class="col-md-6">
+        <h5 style="margin-top: 20px; margin-left: 500px;"> No Books Available.</h5>
+    </div>
+    {% endif %}
+    </form>
+    {% for book in books %}
+    <div class="card">
+        <div class="card-body">
+            <h2 class="h2"> Title: {{ book.name }}</h2>
+            <h2 class="h2"> Authors: {{ book.authors[1:-1] }}</h2>
+            <h2 class="h2"> No of Pages: {{ book.no_of_pages }}</h2>
+            <h2 class="h2"> Price: {{ book.price }}</h2>
+            {% if book.rating %}
+                <h2 class="h2"> Rating: {{ book.rating }}</h2>
+            {% else %}
+                <h2 class="h2"> Rating: Not Enough Rating</h2>
+            {% endif %}
+            <a href="/view_content?content={{ book.content }}" target="_blank">View Book Content</a>
+        </div>
+        <div class="card-footer d-flex justify-content-end">
+            <form action="{{ url_for('delete_book', book_id=book.book_id) }}" method="POST">
+                <input type="hidden" name="book_id" value="{{ book.book_id }}">
+                <input type="hidden" name="section_id" value="{{ section.section_id }}">
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this book?')">Delete</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+    
+{% endblock %}

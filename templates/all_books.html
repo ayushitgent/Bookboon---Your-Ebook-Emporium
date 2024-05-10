@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %} Index {% endblock %}
+
+{% block searchbox %} 
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-8">
+            <form class="d-flex justify-content-end me-0 mb-4 mb-lg-0" action="{{ url_for('get_books') }}" method="GET">
+                 <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="query_all_books">
+                <select class="form-select me-2" name="category" aria-label="Search Category">
+                    <option value="title" selected>Title</option>
+                    <option value="author">Author</option>
+                    <option value="section">Section</option>
+                </select>
+                <button class="btn btn-outline-success" type="submit">Search</button>
+            </form>
+        </div>
+        <div class="col-lg-4 text-end">
+            <a class="navbar-brand me-4" href='get_books?query_current_user={{ True }}'>My Books</a>
+            <a class="navbar-brand" href="/get_books">All Books</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<ul class="list-group">
+    {% if not books %}
+    <li style="margin-top: 40px; margin-bottom: 40px;" class="list-group-item">No Books Available.</li>
+    {% else %}
+    <li style="margin-top: 40px; margin-bottom: 40px;" class="list-group-item">All Available Books :</li>
+    {% endif %}
+    {% for book in books %}
+    <li class="list-group-item">
+        <div class="book-details d-flex justify-content-between align-items-center">
+            <div class="book-info">
+                <strong>Title:</strong> <span>{{ book.name }}</span>
+                <strong>&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;Authors:</strong> <span>{{ book.authors[1:-1] }}</span>
+                <strong>&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;Section:</strong> <span>{{ book.section.title }}</span>
+                <strong>&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;Price:</strong> <span>{{ book.price }}</span>
+                {% if book.rating %}
+                    <strong>&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;Rating:</strong> <span>{{ book.rating }}</span>
+                {% else %}
+                    <strong>&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;Rating: Not Enough Rating</strong>
+                {% endif %}
+            </div>
+            <div class="request-button">
+                {% if book.book_issue.issue_status == 1 and current_user.username == book.book_issue.issued_to %}
+                    <p class="text-success">Issued to You</p>
+                {% elif book.book_issue.issue_status == 1 and current_user.username != book.book_issue.issued_to %}
+                    <p class="text-warning">Issued to Someone</p>
+                {% elif book.book_issue.issue_status == -1 and current_user.username == book.book_issue.issued_to%}
+                    <p class="text-info">Requested by You</p>
+                {% elif book.book_issue.issue_status == -1 and current_user.username != book.book_issue.issued_to%}
+                    <p class="text-info">Requested by Someone</p>
+                {% else %}
+                    <a href="/request_book?book_id={{ book.book_id }}" class="btn btn-primary btn-sm">Request</a>
+                {% endif %}
+                <form method="POST" action="/pay_and_download">
+                    <input type="hidden" name="book_id" value="{{ book.book_id }}">
+                    <label for="price">Enter Price:</label>
+                    <input type="number" id="price" name="price" required>
+                    <button type="submit" class="btn btn-success">Pay Price and Download</button>
+                </form>
+            </div>
+            
+        </div>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}

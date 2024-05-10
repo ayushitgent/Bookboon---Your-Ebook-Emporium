@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %} Index {% endblock %}
+
+{% block searchbox %} 
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-8">
+            <form class="d-flex justify-content-end me-0 mb-4 mb-lg-0" action="{{ url_for('get_books') }}" method="GET">
+                 <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="query_all_books">
+                <select class="form-select me-2" name="category" aria-label="Search Category">
+                    <option value="title" selected>Title</option>
+                    <option value="author">Author</option>
+                    <option value="section">Section</option>
+                </select>
+                <button class="btn btn-outline-success" type="submit">Search</button>
+            </form>
+        </div>
+        <div class="col-lg-4 text-end">
+            <a class="navbar-brand me-4" href="#">My Books</a>
+            <a class="navbar-brand" href="/get_books">All Books</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<ul class="list-group">
+    {% if not books_issued %}
+    <li style="margin-top: 40px; margin-bottom: 40px;" class="list-group-item">No Books Available.</li>
+    {% else %}
+    <li style="margin-top: 40px; margin-bottom: 40px;" class="list-group-item">Your Available Books :</li>
+    {% endif %}
+    {% for book_issued in books_issued %}
+    <li class="list-group-item">
+        <div class="book-details d-flex justify-content-between align-items-center">
+            <div class="book-info">
+                <strong>Title:</strong> <span>{{ book_issued.book.name }}</span>
+                <strong>&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;Author:</strong> <span>{{ book_issued.book.authors[1:-1] }}</span>
+                <strong>&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;Section:</strong> <span>{{ book_issued.book.section.title }}</span>
+                {% if book_issued.book.rating %}
+                    <strong>&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;Rating:</strong> <span>{{ book_issued.book.rating }}</span>
+                {% else %}
+                    <strong>&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;Rating: Not Enough Rating</strong>
+                {% endif %}
+                {% if book_issued.issue_status == 1 %}
+                <strong>&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;Book:</strong> 
+                <a href="/view_content?content={{ book_issued.book.content }}" target="_blank">View Book</a>
+                {% endif %}
+            </div>
+            <div class="request-button">
+                {% if book_issued.issue_status == 1 %}
+                    <p class="text-success">Issued</p>
+                    <form method="POST" action="/rate">
+                        <input type="hidden" name="book_id" value="{{ book_issued.book.book_id }}">
+                        <label for="rating">Please Rate(1 to 5 ):</label>
+                        <input type="number" id="rating" name="rating" required>
+                        <button type="submit" class="btn btn-success">Rate</button>
+                    </form>
+                    <a href="/return_book?book_id={{ book_issued.book.book_id }}" class="btn btn-primary btn-sm">Return</a>
+                {% elif book_issued.issue_status == -1 %}
+                    <p class="text-info">Issue Pending</p>
+                {% elif book_issued.issue_status == 0 %}
+                    <p class="text-info">Issue Rejected</p>
+                {% endif %}
+            </div>
+        </div>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}

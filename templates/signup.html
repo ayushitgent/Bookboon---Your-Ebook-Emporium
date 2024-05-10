@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %} Index {% endblock %}
+
+{% block content %}
+<div style="margin-top: 300px; margin-left: 600px;"> 
+    <form method="POST" action="{{ url_for('signup') }}">
+        <p> Sign Up Form </p>
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required><br><br>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br><br>
+
+        <label for="role">Role:</label>
+        <input type="text" id="role" name="role" required><br><br>
+
+        <input type="submit" value="SignUp">
+    </form>
+</div>
+{% endblock %}
